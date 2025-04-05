@@ -1,18 +1,22 @@
 package flixel.system.debug;
 
-import openfl.display.Bitmap;
-import openfl.display.BitmapData;
-import openfl.display.Sprite;
-import openfl.events.Event;
-import openfl.events.MouseEvent;
-import openfl.geom.Point;
-import openfl.geom.Rectangle;
-import openfl.text.TextField;
+import flash.display.Bitmap;
+import flash.display.BitmapData;
+import flash.display.Sprite;
+import flash.events.Event;
+import flash.events.MouseEvent;
+import flash.geom.Point;
+import flash.geom.Rectangle;
+import flash.text.TextField;
 import flixel.FlxG;
 import flixel.math.FlxMath;
+import flixel.system.debug.FlxDebugger.GraphicCloseButton;
 import flixel.system.ui.FlxSystemButton;
 import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
+
+@:bitmap("assets/images/debugger/windowHandle.png")
+private class GraphicWindowHandle extends BitmapData {}
 
 /**
  * A generic, Flash-based window class, created for use in FlxDebugger.
@@ -86,28 +90,29 @@ class Window extends Sprite
 	/**
 	 * Creates a new window object.  This Flash-based class is mainly (only?) used by FlxDebugger.
 	 *
-	 * @param   title       The name of the window, displayed in the header bar.
-	 * @param   icon	    The icon to use for the window header.
-	 * @param   width       The initial width of the window.
-	 * @param   height      The initial height of the window.
-	 * @param   resizable   Whether you can change the size of the window with a drag handle.
-	 * @param   bounds      A rectangle indicating the valid screen area for the window.
-	 * @param   closable    Whether this window has a close button that removes the window.
-	 * @param   alwaysOnTop Whether this window should be forcibly put in front of any other window when clicked.
+	 * @param   Title       The name of the window, displayed in the header bar.
+	 * @param   Icon	    The icon to use for the window header.
+	 * @param   Width       The initial width of the window.
+	 * @param   Height      The initial height of the window.
+	 * @param   Resizable   Whether you can change the size of the window with a drag handle.
+	 * @param   Bounds      A rectangle indicating the valid screen area for the window.
+	 * @param   Closable    Whether this window has a close button that removes the window.
+	 * @param   AlwaysOnTop Whether this window should be forcibly put in front of any other window when clicked.
 	 */
-	public function new(title, ?icon, width = 0.0, height = 0.0, resizable = true, ?bounds, closable = false, alwaysOnTop = true)
+	public function new(Title:String, ?Icon:BitmapData, Width:Float = 0, Height:Float = 0, Resizable:Bool = true, ?Bounds:Rectangle, Closable:Bool = false,
+			AlwaysOnTop:Bool = true)
 	{
 		super();
 
 		minSize = new Point(50, 30);
 
-		_width = Std.int(Math.abs(width));
-		_height = Std.int(Math.abs(height));
-		updateBounds(bounds);
+		_width = Std.int(Math.abs(Width));
+		_height = Std.int(Math.abs(Height));
+		updateBounds(Bounds);
 		_drag = new Point();
-		_resizable = resizable;
-		_closable = closable;
-		_alwaysOnTop = alwaysOnTop;
+		_resizable = Resizable;
+		_closable = Closable;
+		_alwaysOnTop = AlwaysOnTop;
 
 		_shadow = new Bitmap(new BitmapData(1, 2, true, FlxColor.BLACK));
 		_background = new Bitmap(new BitmapData(1, 1, true, BG_COLOR));
@@ -116,17 +121,17 @@ class Window extends Sprite
 
 		_title = DebuggerUtil.createTextField(2, -1);
 		_title.alpha = HEADER_ALPHA;
-		_title.text = title;
+		_title.text = Title;
 
 		addChild(_shadow);
 		addChild(_background);
 		addChild(_header);
 		addChild(_title);
 
-		if (icon != null)
+		if (Icon != null)
 		{
-			DebuggerUtil.fixSize(icon);
-			_icon = new Bitmap(icon);
+			DebuggerUtil.fixSize(Icon);
+			_icon = new Bitmap(Icon);
 			_icon.x = 5;
 			_icon.y = 2;
 			_icon.alpha = HEADER_ALPHA;
@@ -136,22 +141,20 @@ class Window extends Sprite
 
 		if (_resizable)
 		{
-			_handle = new Bitmap(DebuggerUtil.fixSize(Icon.windowHandle));
+			_handle = new Bitmap(DebuggerUtil.fixSize(new GraphicWindowHandle(0, 0)));
 			addChild(_handle);
 		}
 
 		if (_closable)
 		{
-			_closeButton = new FlxSystemButton(Icon.close, close);
+			_closeButton = new FlxSystemButton(new GraphicCloseButton(0, 0), close);
 			_closeButton.alpha = HEADER_ALPHA;
 			addChild(_closeButton);
 		}
 		else
 		{
 			_id = windowAmount;
-			#if FLX_SAVE
 			loadSaveData();
-			#end
 			windowAmount++;
 		}
 
@@ -258,10 +261,8 @@ class Window extends Sprite
 	{
 		visible = Value;
 
-		#if FLX_SAVE
 		if (!_closable && FlxG.save.isBound)
 			saveWindowVisibility();
-		#end
 
 		if (toggleButton != null)
 			toggleButton.toggled = !visible;
@@ -280,7 +281,6 @@ class Window extends Sprite
 		parent.addChild(this);
 	}
 
-	#if FLX_SAVE
 	function loadSaveData():Void
 	{
 		if (!FlxG.save.isBound)
@@ -308,7 +308,6 @@ class Window extends Sprite
 		FlxG.save.data.windowSettings[_id] = visible;
 		FlxG.save.flush();
 	}
-	#end
 
 	public function update():Void {}
 
@@ -389,8 +388,8 @@ class Window extends Sprite
 			if (_alwaysOnTop)
 				putOnTop();
 			_resizing = true;
-			_drag.x = mouseX - _width;
-			_drag.y = mouseY - _height;
+			_drag.x = _width - mouseX;
+			_drag.y = _height - mouseY;
 		}
 	}
 

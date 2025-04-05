@@ -14,21 +14,13 @@ import steamwrap.api.Controller.ControllerAnalogActionData;
 /**
  * @since 4.6.0
  */
-enum abstract FlxAnalogState(Int) from Int
+@:enum
+abstract FlxAnalogState(Int) from Int
 {
 	var JUST_STOPPED = cast FlxInputState.JUST_RELEASED; // became 0 on this frame
 	var STOPPED = cast FlxInputState.RELEASED; // is 0
 	var MOVED = cast FlxInputState.PRESSED; // is !0
 	var JUST_MOVED = cast FlxInputState.JUST_PRESSED; // became !0 on this frame
-	
-	public var moved(get, never):Bool;
-	inline function get_moved() return this == MOVED || justMoved;
-	public var justMoved(get, never):Bool;
-	inline function get_justMoved() return this == JUST_MOVED;
-	public var justStopped(get, never):Bool;
-	inline function get_justStopped() return this == JUST_STOPPED;
-	public var stopped(get, never):Bool;
-	inline function get_stopped() return this == STOPPED || justStopped;
 }
 
 /**
@@ -106,7 +98,7 @@ class FlxActionInputAnalogMouseMotion extends FlxActionInputAnalog
 		deadZone = DeadZone;
 		invertX = InvertX;
 		invertY = InvertY;
-		super(FlxInputDevice.MOUSE, -1, Trigger, Axis);
+		super(FlxInputDevice.MOUSE, -1, cast Trigger, Axis);
 	}
 
 	override public function update():Void
@@ -153,7 +145,7 @@ class FlxActionInputAnalogMousePosition extends FlxActionInputAnalog
 	 */
 	public function new(Trigger:FlxAnalogState, Axis:FlxAnalogAxis = EITHER)
 	{
-		super(FlxInputDevice.MOUSE, -1, Trigger, Axis);
+		super(FlxInputDevice.MOUSE, -1, cast Trigger, Axis);
 	}
 
 	override public function update():Void
@@ -202,7 +194,7 @@ class FlxActionInputAnalogGamepad extends FlxActionInputAnalog
 	 */
 	public function new(InputID:FlxGamepadInputID, Trigger:FlxAnalogState, Axis:FlxAnalogAxis = EITHER, GamepadID:Int = FlxInputDeviceID.FIRST_ACTIVE)
 	{
-		super(FlxInputDevice.GAMEPAD, InputID, Trigger, Axis, GamepadID);
+		super(FlxInputDevice.GAMEPAD, InputID, cast Trigger, Axis, GamepadID);
 	}
 
 	override public function update():Void
@@ -274,7 +266,7 @@ class FlxActionInputAnalogSteam extends FlxActionInputAnalog
 	@:allow(flixel.input.actions.FlxActionSet)
 	function new(ActionHandle:Int, Trigger:FlxAnalogState, Axis:FlxAnalogAxis = EITHER, DeviceID:Int = FlxInputDeviceID.ALL)
 	{
-		super(FlxInputDevice.STEAM_CONTROLLER, ActionHandle, Trigger, Axis, DeviceID);
+		super(FlxInputDevice.STEAM_CONTROLLER, ActionHandle, cast Trigger, Axis, DeviceID);
 		#if FLX_NO_STEAM
 		FlxG.log.warn("steamwrap library not installed; steam inputs will be ignored.");
 		#end
@@ -319,9 +311,9 @@ class FlxActionInputAnalog extends FlxActionInput
 	static inline var A_X = true;
 	static inline var A_Y = false;
 
-	function new(Device:FlxInputDevice, InputID:Int, Trigger:FlxAnalogState, Axis:FlxAnalogAxis = EITHER, DeviceID:Int = FlxInputDeviceID.FIRST_ACTIVE)
+	function new(Device:FlxInputDevice, InputID:Int, Trigger:FlxInputState, Axis:FlxAnalogAxis = EITHER, DeviceID:Int = FlxInputDeviceID.FIRST_ACTIVE)
 	{
-		super(FlxInputType.ANALOG, Device, InputID, cast Trigger, DeviceID);
+		super(FlxInputType.ANALOG, Device, InputID, Trigger, DeviceID);
 		axis = Axis;
 		xMoved = new FlxInput<Int>(0);
 		yMoved = new FlxInput<Int>(1);
@@ -398,7 +390,8 @@ class FlxActionInputAnalog extends FlxActionInput
 /**
  * @since 4.6.0
  */
-enum abstract FlxAnalogAxis(Int) from Int
+@:enum
+abstract FlxAnalogAxis(Int) from Int
 {
 	var X = 0;
 	var Y = 1;

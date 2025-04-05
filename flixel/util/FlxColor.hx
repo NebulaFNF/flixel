@@ -80,12 +80,6 @@ abstract FlxColor(Int) from Int from UInt to Int to UInt
 	 */
 	public var lightness(get, set):Float;
 
-	/**
-	 * The luminance, or "percieved brightness" of a color (from 0 to 1)
-	 * RGB -> Luma calculation from https://www.w3.org/TR/AERT/#color-contrast
-	 */
-	public var luminance(get, never):Float;
-
 	static var COLOR_REGEX = ~/^(0x|#)(([A-F0-9]{2}){3,4})$/i;
 
 	/**
@@ -374,7 +368,7 @@ abstract FlxColor(Int) from Int from UInt to Int to UInt
 	/**
 	 * Return a String representation of the color in the format
 	 *
-	 * @param Alpha Whether to include the alpha value in the hex string
+	 * @param Alpha Whether to include the alpha value in the hes string
 	 * @param Prefix Whether to include "0x" prefix at start of string
 	 * @return	A string of length 10 in the format 0xAARRGGBB
 	 */
@@ -517,11 +511,11 @@ abstract FlxColor(Int) from Int from UInt to Int to UInt
 	 * @param	Alpha		How opaque the color should be, either between 0 and 1 or 0 and 255.
 	 * @return	This color
 	 */
-	public inline function setHSB(Hue:Float, Saturation:Float, Brightness:Float, Alpha = 1.0):FlxColor
+	public inline function setHSB(Hue:Float, Saturation:Float, Brightness:Float, Alpha:Float):FlxColor
 	{
 		var chroma = Brightness * Saturation;
 		var match = Brightness - chroma;
-		return setHueChromaMatch(Hue, chroma, match, Alpha);
+		return setHSChromaMatch(Hue, Saturation, chroma, match, Alpha);
 	}
 
 	/**
@@ -533,17 +527,17 @@ abstract FlxColor(Int) from Int from UInt to Int to UInt
 	 * @param	Alpha		How opaque the color should be, either between 0 and 1 or 0 and 255
 	 * @return	This color
 	 */
-	public inline function setHSL(Hue:Float, Saturation:Float, Lightness:Float, Alpha = 1.0):FlxColor
+	public inline function setHSL(Hue:Float, Saturation:Float, Lightness:Float, Alpha:Float):FlxColor
 	{
 		var chroma = (1 - Math.abs(2 * Lightness - 1)) * Saturation;
 		var match = Lightness - chroma / 2;
-		return setHueChromaMatch(Hue, chroma, match, Alpha);
+		return setHSChromaMatch(Hue, Saturation, chroma, match, Alpha);
 	}
 
 	/**
 	 * Private utility function to perform common operations between setHSB and setHSL
 	 */
-	inline function setHueChromaMatch(Hue:Float, Chroma:Float, Match:Float, Alpha:Float):FlxColor
+	inline function setHSChromaMatch(Hue:Float, Saturation:Float, Chroma:Float, Match:Float, Alpha:Float):FlxColor
 	{
 		Hue %= 360;
 		var hueD = Hue / 60;
@@ -736,7 +730,7 @@ abstract FlxColor(Int) from Int from UInt to Int to UInt
 		var hue:Float = 0;
 		if (hueRad != 0)
 		{
-			hue = 180 / Math.PI * hueRad;
+			hue = 180 / Math.PI * Math.atan2(Math.sqrt(3) * (greenFloat - blueFloat), 2 * redFloat - greenFloat - blueFloat);
 		}
 
 		return hue < 0 ? hue + 360 : hue;
@@ -745,11 +739,6 @@ abstract FlxColor(Int) from Int from UInt to Int to UInt
 	inline function get_brightness():Float
 	{
 		return maxColor();
-	}
-
-	inline function get_luminance():Float
-	{
-		return (redFloat * 299 + greenFloat * 587 + blueFloat * 114) / 1000;
 	}
 
 	inline function get_saturation():Float
